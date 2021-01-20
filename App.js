@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Button, KeyboardAvoidingView, Text, TextInput, TouchableHighlight, View } from 'react-native';
+import { GiftedChat } from 'react-native-gifted-chat';
 import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -8,28 +9,30 @@ import { createStackNavigator } from '@react-navigation/stack';
 import styles from './styles/App.Style.js';
 import { ValidateStr } from './utils/ValidateStr.js';
 
-const onUpdateContactStr = (updatedStr) => {
-  if (updatedStr.length > 0) {
-    // Validate updated string
-    strResults = ValidateStr(updatedStr);
-
-    if (strResults !== null) {
-      setContactStr(updatedStr);
-    }
-  }
-  else {
-    setContactStr('');
-  }
-}
-
 // Stack Navigator
 const Stack = createStackNavigator();
 
 const App = () => {
+  // Handler functions
+  const onUpdateContactStr = (updatedStr) => {
+    if (updatedStr.length > 0) {
+      // Validate updated string
+      strResults = ValidateStr(updatedStr);
+
+      if (strResults !== null) {
+        setContactStr(updatedStr);
+      }
+    }
+    else {
+      setContactStr('');
+    }
+  }
+
   // Contacts
   const [contactStr, setContactStr] = useState('');
   const contactInputRef = useRef(null);
 
+  // Navigation screens
   const HomeScreen = ({ navigation }) => {
     return (
       <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : "height"}
@@ -45,15 +48,18 @@ const App = () => {
         </View>
 
         <View style={styles.contactListContainer}>
-          <TouchableHighlight style={styles.contactListItem}>
-            <Text>Update Contact</Text>
+          <TouchableHighlight style={styles.contactListItem}
+                              onPress={() => { navigation.navigate('Details') }}>
+            <Text>Contact Info</Text>
           </TouchableHighlight>
         </View>
   
-        <View style={styles.btnContainer}>
-          <TouchableHighlight>
-            <Text style={styles.btnText}>Update Contact</Text>
-          </TouchableHighlight>
+        <View style={styles.btnFlexRowContainer}>
+          <Button title="Manage" onPress={() => { navigation.navigate('Manage') }}>
+          </Button>
+
+          <Button title="Chat" onPress={() => { navigation.navigate('Chat') }}>
+          </Button>
         </View>
       </KeyboardAvoidingView>
     );
@@ -61,8 +67,19 @@ const App = () => {
 
   const DetailsScreen = ({ navigation }) => {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={styles.mainContainer}>
         <Text>Details Screen</Text>
+  
+        <Button title="Go to Home" onPress={() => navigation.navigate('Home')} />
+        <Button title="Go back" onPress={() => navigation.goBack()} />
+      </View>    
+    );
+  };
+
+  const ManageScreen = ({ navigation }) => {
+    return (
+      <View style={styles.mainContainer}>
+        <Text>Update Screen</Text>
   
         <Button title="Go to Home" onPress={() => navigation.navigate('Home')} />
         <Button title="Go back" onPress={() => navigation.goBack()} />
@@ -72,29 +89,9 @@ const App = () => {
   
   const ChatScreen = ({ navigation, route }) => {
     return (
-      <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : "height"}
-                            style={styles.mainContainer}>
-        <Label text="Chat Label 1"/>
-  
-        <View style={styles.textInputContainer}>
-          <TextInput style={styles.textInput}
-                      ref={tipPctInputRef}
-                      value={tipPctStr}
-                      placeholder="Enter tip percentage"
-                      onChangeText={(pct) => onChangeTipPct(pct)}
-          />
-        </View>
-  
-        <View style={styles.btnContainer}>
-          <TouchableHighlight onPress={() => navigation.navigate('Home')}>
-            <Text style={styles.btnText}>Home</Text>
-          </TouchableHighlight>
-  
-          <TouchableHighlight onPress={() => navigation.goBack()}>
-            <Text style={styles.btnText}>Go Back</Text>
-          </TouchableHighlight>
-        </View>
-      </KeyboardAvoidingView>
+      <View style={styles.mainContainer}>
+        <GiftedChat />
+      </View>
     );
   };
     
@@ -103,13 +100,19 @@ const App = () => {
       <Stack.Navigator>
         <Stack.Screen name="Home"
                       component={HomeScreen}
-                      options={{ title: 'Chat Manager' }} />
+                      options={{ title: 'Home' }} />
 
         <Stack.Screen name="Details"
-                      component={DetailsScreen} />
+                      component={DetailsScreen}
+                      options={{ title: 'Display Details' }} />
+
+        <Stack.Screen name="Manage"
+                      component={ManageScreen}
+                      options={{ title: 'Account Management' }} />
 
         <Stack.Screen name="Chat" 
-                      component={ChatScreen} />
+                      component={ChatScreen} 
+                      options={{ title: 'Chat' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
